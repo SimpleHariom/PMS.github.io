@@ -1,0 +1,213 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>पासवान मेडिकल स्टोर</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #e6f0fa, #d4edda); /* नीला से हरा */
+            color: #333;
+            line-height: 1.6;
+        }
+        .header {
+            background: linear-gradient(to right, #007bff, #28a745); /* नीला से हरा */
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            animation: fadeIn 1.5s ease-in;
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(-20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .header h1 {
+            font-size: 2.8em;
+            margin: 10px 0;
+            background: linear-gradient(to right, #fff, #fd7e14);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .header p {
+            font-size: 1.2em;
+            margin: 5px 0;
+        }
+        .navbar {
+            background-color: #28a745;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .navbar a {
+            float: left;
+            color: white;
+            text-align: center;
+            padding: 14px 20px;
+            text-decoration: none;
+            font-size: 1.1em;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+        .navbar a:hover {
+            background-color: #fd7e14;
+            transform: translateY(-2px);
+        }
+        .content {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        .content h2 {
+            color: #007bff;
+            border-bottom: 2px solid #fd7e14;
+            padding-bottom: 10px;
+            margin-top: 20px;
+        }
+        .doctor-section {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+            text-align: left;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .doctor-section img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin-right: 20px;
+            border: 3px solid #28a745;
+        }
+        .doctor-info h3 {
+            color: #fd7e14;
+            margin: 0;
+        }
+        .animal-list ul li {
+            padding: 8px 0;
+            font-size: 1.1em;
+        }
+        .animal-list ul li i {
+            color: #fd7e14;
+            margin-right: 10px;
+        }
+        .footer {
+            background-color: #007bff;
+            color: white;
+            padding: 8px;
+            font-size: 0.9em;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .header h1 { font-size: 2em; }
+            .doctor-section { flex-direction: column; text-align: center; }
+            .navbar a { float: none; display: block; padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>पासवान मेडिकल स्टोर</h1>
+        <p>रुद्रपुर रोड, रामलक्षन, देवरिया</p>
+    </div>
+
+    <div class="navbar">
+        <a href="#about"><i class="fas fa-info-circle"></i> हमारे बारे में</a>
+        <a href="#admin"><i class="fas fa-user-shield"></i> प्रशासनिक</a>
+        <a href="#animals"><i class="fas fa-paw"></i> जानवरों का प्रकार</a>
+        <a href="#contact"><i class="fas fa-phone"></i> संपर्क: 9936976337</a>
+    </div>
+
+    <div class="content">
+        <h2 id="about">हमारे बारे में</h2>
+        <div class="doctor-section">
+            <img src="https://images.unsplash.com/photo-1612349317150-e413f6a5b16d" alt="डॉ. नंदलाल प्रसाद">
+            <div class="doctor-info">
+                <h3>डॉ. नंदलाल प्रसाद</h3>
+                <p><strong>रिटायर्ड वेटरनरी डॉक्टर</strong><br>33.5+ वर्षों का अनुभव<br>पशु चिकित्सा में विशेषज्ञता</p>
+            </div>
+        </div>
+        <p>पासवान मेडिकल स्टोर आपके पशुओं के लिए उच्च गुणवत्ता वाली दवाइयां और स्वास्थ्य सेवाएं प्रदान करता है। डॉ. नंदलाल प्रसाद के 33.5+ वर्षों के अनुभव के साथ, हम आपके जानवरों को स्वस्थ और खुशहाल रखने के लिए प्रतिबद्ध हैं।</p>
+
+        <h2 id="admin">प्रशासनिक</h2>
+        <p>हमारा स्टोर पशु चिकित्सा नियमों के अनुसार पूरी तरह लाइसेंस प्राप्त है। हम केवल प्रमाणित और सुरक्षित दवाइयां बेचते हैं।</p>
+
+        <h2 id="animals">जानवरों का प्रकार</h2>
+        <p>हम निम्नलिखित जानवरों के लिए दवाइयां और सेवाएं प्रदान करते हैं:</p>
+        <ul id="animalList" class="animal-list">
+            <li><i class="fas fa-cow"></i> गाय और भैंस: टीके, पोषण सप्लीमेंट, और बीमारी की दवाएं।</li>
+            <li><i class="fas fa-sheep"></i> बकरी और भेड़: परजीवी नियंत्रण और सामान्य स्वास्थ्य दवाएं।</li>
+            <li><i class="fas fa-dog"></i> कुत्ते और बिल्ली: पालतू जानवरों के लिए दवाइयां और देखभाल उत्पाद।</li>
+            <li><i class="fas fa-dove"></i> पक्षी: पोल्ट्री और अन्य पक्षियों के लिए विशेष दवाएं।</li>
+            <li><i class="fas fa-horse"></i> अन्य पशु: घोड़े, सुअर आदि के लिए कस्टम समाधान।</li>
+        </ul>
+
+        <h2 id="contact">संपर्क</h2>
+        <p>हमें संपर्क करें: <strong>9936976337</strong><br>
+        ईमेल: <a href="mailto:leonandlal65@gmail.com" style="color: #fd7e14;">leonandlal65@gmail.com</a><br>
+        पता: रुद्रपुर रोड, रामलक्षन, देवरिया</p>
+    </div>
+
+    <div class="footer">
+        <p>&copy; 2025 पासवान मेडिकल स्टोर। सभी अधिकार सुरक्षित।<br>डॉ. नंदलाल प्रसाद | संपर्क: 9936976337 | ईमेल: leonandlal65@gmail.com</p>
+    </div>
+
+    <script>
+        // स्क्रॉल पर हेडर को हल्का स्केल करने का एनिमेशन
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 50) {
+                header.style.transform = 'scale(0.98)';
+            } else {
+                header.style.transform = 'scale(1)';
+            }
+        });
+    </script>
+</body>
+</html>
